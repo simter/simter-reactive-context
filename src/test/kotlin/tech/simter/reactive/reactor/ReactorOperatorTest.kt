@@ -2,6 +2,7 @@ package tech.simter.reactive.reactor
 
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.lang.RuntimeException
 
@@ -31,7 +32,7 @@ class ReactorOperatorTest {
         .doOnNext { println("0-$it") } // never invoke
         .then(Mono.just(true).flatMap { data(1) }.doOnNext { println("1-$it") })
         .doOnNext { println("2-$it") }
-        .thenEmpty {  }
+        .thenEmpty { }
         .subscribe()
     } catch (e: Exception) {
       println(e.javaClass)
@@ -41,5 +42,36 @@ class ReactorOperatorTest {
   private fun data(id: Int): Mono<Int> {
     println("in data: id=$id")
     return Mono.just(id)
+  }
+
+  // https://stackoverflow.com/questions/51837156
+  @Test
+  fun thenManyLostFluxData() {
+    Mono.empty<Int>()
+      .thenMany<Int> { Flux.fromIterable(listOf(1, 2)) }
+      .subscribe { println("b:$it") } // why not output item 1, 2
+  }
+
+  @Test
+  fun thenManyRunForever() {
+    Mono.empty<Int>()
+      .thenMany<Int> { Flux.fromIterable(listOf(1, 2)) }
+      .blockLast() // why not output item 1, 2
+  }
+
+  // this method output item 1, 2
+  @Test
+  @Disabled
+  fun flatMapIterableTest() {
+    Mono.empty<Int>()
+      .then(Mono.just(listOf(1, 2)))
+      .flatMapIterable { it.asIterable() }
+      .subscribe { println(it) } // output item 1, 2
+  }
+
+  @Test
+  fun tt() {
+    Flux.range(1, 3)
+      .subscribe { println(it) }
   }
 }
