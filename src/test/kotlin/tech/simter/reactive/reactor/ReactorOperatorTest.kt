@@ -44,29 +44,52 @@ class ReactorOperatorTest {
     return Mono.just(id)
   }
 
-  // https://stackoverflow.com/questions/51837156
   @Test
-  fun thenManyLostFluxData() {
+  fun thenManyLostPublisherData() {
     Mono.empty<Int>()
-      .thenMany<Int> { Flux.fromIterable(listOf(1, 2)) }
-      .subscribe { println("b:$it") } // why not output item 1, 2
+      .thenMany<Int> { Flux.just(1, 2) }
+      .subscribe { println(it) } // not output item 1, 2
   }
 
   @Test
   fun thenManyRunForever() {
     Mono.empty<Int>()
-      .thenMany<Int> { Flux.fromIterable(listOf(1, 2)) }
-      .blockLast() // why not output item 1, 2
+      .thenMany<Int> { Flux.just(1, 2) }
+      .blockLast() // run forever
+  }
+
+  // https://stackoverflow.com/questions/51837156
+  @Test
+  fun thenManyLostFluxData2() {
+    Mono.just(0)
+      .thenMany<Int> { Flux.just(1, 2) }
+      .subscribe { println(it) } // not output item 1, 2
+  }
+
+  @Test
+  fun thenManyRunForever2() {
+    Mono.just(0)
+      .thenMany<Int> { Flux.just(1, 2) }
+      .blockLast() // run forever
   }
 
   // this method output item 1, 2
   @Test
-  @Disabled
-  fun flatMapIterableTest() {
+  fun useFlatMapIterableInsteadThenMany() {
     Mono.empty<Int>()
-      .then(Mono.just(listOf(1, 2)))
+      .then(Flux.just(1, 2).collectList())
       .flatMapIterable { it.asIterable() }
       .subscribe { println(it) } // output item 1, 2
+  }
+
+  // this method output item 1, 2
+  @Test
+  fun useFlatMapIterableInsteadThenMany2() {
+    Mono.empty<Int>()
+      .then(Flux.just(1, 2).collectList())
+      .flatMapIterable { it.asIterable() }
+      .doOnNext { println(it) } // output item 1, 2
+      .blockLast()
   }
 
   @Test
