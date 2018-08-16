@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 import java.lang.RuntimeException
 
 /**
@@ -44,6 +45,7 @@ class ReactorOperatorTest {
     return Mono.just(id)
   }
 
+  // https://stackoverflow.com/questions/51837156
   @Test
   fun thenManyLostPublisherData() {
     Mono.empty<Int>()
@@ -51,24 +53,28 @@ class ReactorOperatorTest {
       .subscribe { println(it) } // not output item 1, 2
   }
 
+  // just use ( ) instead of { }
   @Test
-  fun thenManyRunForever() {
-    Mono.empty<Int>()
-      .thenMany<Int> { Flux.just(1, 2) }
-      .blockLast() // run forever
+  fun thenManyLostFluxData_FixedBySimonbasle() {
+    StepVerifier.create(
+      Mono.empty<Int>().thenMany(Flux.just(1, 2))
+    ).expectNext(1, 2)
+      .expectComplete()
+      .verify()
   }
 
-  // https://stackoverflow.com/questions/51837156
   @Test
-  fun thenManyLostFluxData2() {
-    Mono.just(0)
-      .thenMany<Int> { Flux.just(1, 2) }
-      .subscribe { println(it) } // not output item 1, 2
+  fun thenManyRunForever() {
+    StepVerifier.create(
+      Mono.empty<Int>().thenMany<Int> { Flux.just(1, 2) }
+    ).expectNext(1, 2)
+      .expectComplete()
+      .verify()
   }
 
   @Test
   fun thenManyRunForever2() {
-    Mono.just(0)
+    Mono.empty<Int>()
       .thenMany<Int> { Flux.just(1, 2) }
       .blockLast() // run forever
   }
@@ -90,11 +96,5 @@ class ReactorOperatorTest {
       .flatMapIterable { it.asIterable() }
       .doOnNext { println(it) } // output item 1, 2
       .blockLast()
-  }
-
-  @Test
-  fun tt() {
-    Flux.range(1, 3)
-      .subscribe { println(it) }
   }
 }
