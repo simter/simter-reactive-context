@@ -93,6 +93,20 @@ object SystemContext {
   }
 
   /**
+   * Determine whether the system-context has [roleA], [roleB].
+   */
+  fun hasRole(roleA: String, roleB: String): Mono<Pair<Boolean, Boolean>> {
+    return getDataHolder().map { it.hasRole(roleA, roleB) }
+  }
+
+  /**
+   * Determine whether the system-context has [roleA], [roleB], [roleC].
+   */
+  fun hasRole(roleA: String, roleB: String, roleC: String): Mono<Triple<Boolean, Boolean, Boolean>>{
+    return getDataHolder().map { it.hasRole(roleA, roleB, roleC) }
+  }
+
+  /**
    * Hold the system-context data.
    */
   data class DataHolder(
@@ -105,6 +119,14 @@ object SystemContext {
 
     fun hasAllRole(vararg roles: String): Boolean {
       return roles.all { this.roles.contains(it) }
+    }
+
+    fun hasRole(roleA: String, roleB: String): Pair<Boolean, Boolean> {
+      return Pair(this.roles.contains(roleA), this.roles.contains(roleB))
+    }
+
+    fun hasRole(roleA: String, roleB: String, roleC: String): Triple<Boolean, Boolean, Boolean> {
+      return Triple(this.roles.contains(roleA), this.roles.contains(roleB), this.roles.contains(roleC))
     }
   }
 
