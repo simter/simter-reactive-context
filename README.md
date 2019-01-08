@@ -21,14 +21,14 @@ fun verifyHasAllRole(vararg roles: String): Mono<Void>
 <dependency>
   <groupId>tech.simter.reactive</groupId>
   <artifactId>simter-reactive-context</artifactId>
-  <version>0.5.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
 ## Requirement
 
-- Maven 3.5.2+
-- Kotlin 1.2.31+
+- Maven 3.6+
+- Kotlin 1.3+
 - Reactor 3+
 
 ## Build
