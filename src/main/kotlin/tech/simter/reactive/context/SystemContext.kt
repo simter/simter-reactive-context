@@ -29,6 +29,28 @@ object SystemContext {
   }
 
   /**
+   * Get the specific [key] value.
+   *
+   * Return [Mono.empty] if there was no mapping for [key]
+   */
+  @Suppress("UNCHECKED_CAST")
+  fun <V> get(key: String): Mono<V> {
+    return getDataHolder().flatMap { Mono.justOrEmpty(it.extras[key] as V) }
+  }
+
+  /**
+   * Get the specific [key] value.
+   *
+   * Return Mono.just([Optional.empty]) if there was no mapping for [key]
+   */
+  @Suppress("UNCHECKED_CAST")
+  fun <V> getOptional(key: String): Mono<Optional<V>> {
+    return getDataHolder()
+      .map { Optional.ofNullable(it.extras[key] as V) }
+      .switchIfEmpty(Mono.just(Optional.empty()))
+  }
+
+  /**
    * Get the authenticated user info.
    *
    * Return a mono instance with the authenticated user info if has a authenticated system-context,
@@ -111,7 +133,8 @@ object SystemContext {
    */
   data class DataHolder(
     val user: User,
-    private val roles: List<String>
+    private val roles: List<String>,
+    val extras: Map<String, Any> = emptyMap()
   ) {
     fun hasAnyRole(vararg roles: String): Boolean {
       return roles.any { this.roles.contains(it) }

@@ -166,6 +166,58 @@ class SystemContextTest {
       .verify()
   }
 
+  @Test
+  fun `Get It`() {
+    StepVerifier.create(
+      SystemContext.get<String>("TheKey")
+        .subscriberContext {
+          it.put(SYSTEM_CONTEXT_KEY, DEFAULT_SYSTEM_CONTEXT.copy(
+            extras = mapOf("TheKey" to "TheValue")
+          ))
+        }
+    ).expectNext("TheValue").verifyComplete()
+  }
+
+  @Test
+  fun `Get Without Context`() {
+    StepVerifier.create(SystemContext.get<String>("NOT_EXISTS"))
+      .verifyComplete()
+  }
+
+  @Test
+  fun `Get With Not Exist Key`() {
+    StepVerifier.create(
+      SystemContext.get<String>("NOT_EXISTS")
+        .subscriberContext { it.put(SYSTEM_CONTEXT_KEY, DEFAULT_SYSTEM_CONTEXT) }
+    ).verifyComplete()
+  }
+
+  @Test
+  fun `Get Optional`() {
+    StepVerifier.create(
+      SystemContext.getOptional<String>("TheKey")
+        .subscriberContext {
+          it.put(SYSTEM_CONTEXT_KEY, DEFAULT_SYSTEM_CONTEXT.copy(
+            extras = mapOf("TheKey" to "TheValue")
+          ))
+        }
+    ).expectNext(Optional.of("TheValue")).verifyComplete()
+  }
+
+  @Test
+  fun `Get Optional Without Context`() {
+    StepVerifier.create(SystemContext.getOptional<String>("NOT_EXISTS"))
+      .expectNext(Optional.empty()).verifyComplete()
+  }
+
+  @Test
+  fun `Get Optional With Not Exist Key`() {
+    StepVerifier.create(
+      SystemContext.getOptional<String>("NOT_EXISTS")
+        .subscriberContext { it.put(SYSTEM_CONTEXT_KEY, DEFAULT_SYSTEM_CONTEXT) }
+    ).expectNext(Optional.empty()).verifyComplete()
+  }
+
   companion object {
     private val DEFAULT_ROLES = listOf("ADMIN", "COMMON", "TESTER")
     val DEFAULT_USER = SystemContext.User(
