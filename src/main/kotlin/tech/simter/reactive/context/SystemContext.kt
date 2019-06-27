@@ -102,7 +102,7 @@ object SystemContext {
   /**
    * Determine whether the system-context has [roleA], [roleB], [roleC].
    */
-  fun hasRole(roleA: String, roleB: String, roleC: String): Mono<Triple<Boolean, Boolean, Boolean>>{
+  fun hasRole(roleA: String, roleB: String, roleC: String): Mono<Triple<Boolean, Boolean, Boolean>> {
     return getDataHolder().map { it.hasRole(roleA, roleB, roleC) }
   }
 
