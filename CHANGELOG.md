@@ -1,5 +1,9 @@
 # simter-reactive-context changelog
 
+## 1.2.0-M2 - 2020-04-15
+
+- Upgrade to simter-dependencies-1.3.0-M14
+
 ## 1.2.0-M1 - 2020-03-01
 
 - Upgrade to simter-dependencies-1.3.0-M13
